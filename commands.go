@@ -82,6 +82,7 @@ func (gdb *Gdb) CheckedSend(operation string, arguments ...string) (map[string]i
 
 func (gdb *Gdb) recordReader() {
 	scanner := bufio.NewScanner(gdb.stdout)
+	scanner.Buffer(make([]byte, 0, 512000), 512000)
 	for scanner.Scan() {
 		// scan the GDB output one line at a time skipping the GDB terminator
 		line := scanner.Text()
