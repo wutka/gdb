@@ -2,7 +2,7 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/cyrus-and/gdb"
+	"github.com/wutka/gdb"
 	"golang.org/x/net/websocket"
 	"io"
 	"io/ioutil"
