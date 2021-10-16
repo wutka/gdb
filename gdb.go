@@ -43,7 +43,7 @@ func New(onNotification NotificationCallback) (*Gdb, error) {
 	}
 
 	raw, err := unix.IoctlGetTermios(int(ptm.Fd()), unix.TCGETA)
-	if err != nil {
+	if err == nil {
 		rawState := *raw
 		rawState.Lflag &^= unix.ECHO
 
