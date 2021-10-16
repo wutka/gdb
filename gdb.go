@@ -42,12 +42,12 @@ func New(onNotification NotificationCallback) (*Gdb, error) {
 		return nil, err
 	}
 
-	raw, err := unix.IoctlGetTermios(ptm.Fd(), unix.TCGETA)
+	raw, err := unix.IoctlGetTermios(int(ptm.Fd()), unix.TCGETA)
 	if err != nil {
 		rawState := *raw
 		rawState.Lflag &^= unix.ECHO
 
-		_ = unix.IoctlSetTermios(ptm.Fd(), unix.TCSETA, &rawState)
+		_ = unix.IoctlSetTermios(int(ptm.Fd()), unix.TCSETA, &rawState)
 	}
 
 	// create GDB command
