@@ -2,7 +2,6 @@ package gdb
 
 import (
 	"github.com/kr/pty"
-	"golang.org/x/sys/unix"
 	"io"
 	"os"
 	"os/exec"
@@ -40,14 +39,6 @@ func New(onNotification NotificationCallback) (*Gdb, error) {
 	ptm, pts, err := pty.Open()
 	if err != nil {
 		return nil, err
-	}
-
-	raw, err := unix.IoctlGetTermios(int(ptm.Fd()), unix.TCGETA)
-	if err == nil {
-		rawState := *raw
-		rawState.Lflag &^= unix.ECHO
-
-		_ = unix.IoctlSetTermios(int(ptm.Fd()), unix.TCSETA, &rawState)
 	}
 
 	// create GDB command
