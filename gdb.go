@@ -1,7 +1,10 @@
 package gdb
 
 import (
+	"errors"
+	"fmt"
 	"github.com/kr/pty"
+	"golang.org/x/sys/unix"
 	"io"
 	"os"
 	"os/exec"
@@ -41,6 +44,11 @@ func New(onNotification NotificationCallback) (*Gdb, error) {
 		return nil, err
 	}
 
+	err = disableFlowControl(ptm.Fd())
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("unable to disable flow control on pty: %+v", err))
+	}
+
 	// create GDB command
 	cmd := []string{"gdb", "--nx", "--quiet", "--interpreter=mi2", "--tty", pts.Name()}
 	gdb, err := NewCmd(cmd, onNotification)
@@ -55,6 +63,22 @@ func New(onNotification NotificationCallback) (*Gdb, error) {
 	gdb.pts = pts
 
 	return gdb, nil
+}
+
+func disableFlowControl(fd uintptr) error {
+	termios, err := unix.IoctlGetTermios(int(fd), uint(unix.TCGETS))
+	if err != nil {
+		return err
+	}
+	if termios.Iflag&unix.IXON != 0 {
+		termios.Iflag -= unix.IXON
+	}
+	if termios.Iflag&unix.IXOFF != 0 {
+		termios.Iflag -= unix.IXOFF
+	}
+	err = unix.IoctlSetTermios(int(fd), uint(unix.TCSETS), termios)
+	return err
+
 }
 
 // NewCmd creates a new GDB instance like New, but allows explicitely
